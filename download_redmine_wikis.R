@@ -59,8 +59,28 @@ get_wiki_page_and_attachments <- function(identifier, wiki_title) {
              )
   }
 
-  return(list(wiki_page_info, attachments))
+  return(list(page_info = wiki_page_info, attachments = attachments))
+}
+
+download_attachment <- function(project_identifier, url) {
+  # https://yokekeong.com/download-files-over-https-in-r-with-httr/
+  file_name <- url %>%
+    str_split("/") %>%
+    sapply(tail, 1)
+  GET(url,
+      write_disk(paste0(project_identifier, "/", file_name)),
+      config = authenticate(Sys.getenv("REDMINE_USER"), Sys.getenv("REDMINE_PASSWORD"), type = "basic")
+      )
+}
+
+store_wiki_locally <- function(project) {
+  wikis <- gather_wikis(project)
+
+  get_wiki_pages <- Vectorize(get_wiki_page_and_attachments)
+
+  project_wiki_info <- wikis %>%
+    rowwise() %>%
+    mutate(info = list(get_wiki_pages("imagingdmd", title)))
 }
 
 # TODO: save the page content to a textile file in an appropriate subdirectory
-# TODO: download all attachments

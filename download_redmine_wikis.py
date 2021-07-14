@@ -8,6 +8,7 @@ import csv
 import re
 import subprocess
 import sys
+import argparse
 
 # Set globals
 load_dotenv(".env")
@@ -149,3 +150,15 @@ def download_project(identifier):
         if wiki_obj:
             download_wiki_page(wiki_obj)
     os.chdir(base_dir)
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--output_dir", help="Directory in which the wikis will be downloaded")
+    args = parser.parse_args()
+    if (args.output_dir):
+        globals().update(base_dir = os.path.abspath(args.output_dir))
+        if not os.path.exists(base_dir):
+            os.makedirs(base_dir)
+    projects = gather_projects()
+    for project in projects:
+        download_project(project['identifier'])

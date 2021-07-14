@@ -124,7 +124,7 @@ def download_project(identifier):
         wiki_path = project_dir + "/" + wiki_path
         wiki_obj = get_wiki_page_and_attachments(identifier, title)
         try:
-            os.mkdir(wiki_path)
+            os.makedirs(wiki_path)
         except FileExistsError:
             # dir exists already, just switch to it
             pass

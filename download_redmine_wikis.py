@@ -7,6 +7,7 @@ import json
 import csv
 import re
 import subprocess
+import sys
 
 # Set globals
 load_dotenv(".env")
@@ -24,10 +25,17 @@ def get_data_from_endpoint(target_url):
     return response_object
 
 
-# limited to 25 projects
 def gather_projects():
-    target_url = url + "projects.json"
-    return get_data_from_endpoint(target_url)
+    all_projects = {}
+    project_pass = {}
+    offset = 0
+    # TODO: check for project_pass['projects'] == []
+    while offset < 100:
+        target_url = url + f"projects.json?limit=100&offset={offset}"
+        project_pass = get_data_from_endpoint(target_url)
+        all_projects.update(project_pass)
+        offset += 100
+    return all_projects['projects']
 
 
 def gather_wikis_from_project(identifier):
@@ -56,6 +64,9 @@ def download_attachment(attachment_obj):
 
 
 def replace_redmine_wiki_with_textile_link(page_content):
+    """
+    Restructure links from [[Wiki Page]] to "Wiki page":wiki_page.md
+    """
     proper = re.sub(pattern = r'\[\[(.*)\]\]', # capture text within [[]] tags
                     # must use a lambda to allow replacing within a group
                     # https://stackoverflow.com/a/56393435/7418735
@@ -71,15 +82,19 @@ def replace_redmine_wiki_with_textile_link(page_content):
 
 def download_wiki_page(wiki_obj):
     wiki_title = wiki_obj['title']
+    print()
+    print("---")
     print(f"Downloading {wiki_title}")
-    page_content = replace_redmine_wiki_with_textile_link(wiki_obj.pop('text'))
+    sys.stdout.flush()
+    # page_content = replace_redmine_wiki_with_textile_link(wiki_obj.pop('text'))
+    page_content = wiki_obj.pop('text')
     attachments = wiki_obj['attachments']
     if attachments:
         page_content += "\n" + "Attachments:"
         for attachment in attachments:
             download_attachment(attachment)
             # append a Textile style link to the page
-            filename = attachment['filename']
+            filename = attachment['filename'].replace(" ", "\ ")
             attachment_link = f"\"{filename}\":{filename}"
             page_content += "\n" + attachment_link
     with open(wiki_title + ".textile", 'w') as f:
@@ -92,6 +107,8 @@ def download_wiki_page(wiki_obj):
 
 
 def download_project(identifier):
+    print()
+    print("===")
     print(f"Downloading project: {identifier}")
     project_wikis = gather_wikis_from_project(identifier)
     if project_wikis == []:
@@ -104,21 +121,21 @@ def download_project(identifier):
         # dir exists already, just switch to it
         pass
     os.chdir(project_dir)
-    project_map = {}
+    project_wiki_map = {}
     # create a mapping to hierchically store in parent's dir
     for wiki in project_wikis:
         title = wiki['title']
-        project_map.update({title: ''})
+        project_wiki_map.update({title: ''})
         if 'parent' in wiki:
-            project_map[title] = wiki['parent']['title']
+            project_wiki_map[title] = wiki['parent']['title']
 
     for wiki in project_wikis:
         title = wiki['title']
         parent_title = title
         wiki_path = ""
         # prepend parents in file path to enforce nested hierarchy
-        while project_map[parent_title] != '':
-            parent_title = project_map[parent_title]
+        while project_wiki_map[parent_title] != '':
+            parent_title = project_wiki_map[parent_title]
             wiki_path = parent_title + "/" + wiki_path
 
         wiki_path = project_dir + "/" + wiki_path

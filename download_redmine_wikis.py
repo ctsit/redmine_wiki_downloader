@@ -32,7 +32,10 @@ def gather_projects():
 
 def gather_wikis_from_project(identifier):
     target_url = url + "projects/" + identifier + "/wiki/index.json"
-    return get_data_from_endpoint(target_url)['wiki_pages']
+    try:
+        return get_data_from_endpoint(target_url)['wiki_pages']
+    except KeyError:
+        return []
 
 
 def get_wiki_page_and_attachments(identifier, wiki_title):
@@ -89,7 +92,11 @@ def download_wiki_page(wiki_obj):
 
 
 def download_project(identifier):
+    print(f"Downloading project: {identifier}")
     project_wikis = gather_wikis_from_project(identifier)
+    if project_wikis == []:
+        print(f"{identifier} has no wiki, skipping")
+        return
     project_dir = base_dir + "/" + identifier + "/"
     try:
         os.mkdir(project_dir)

@@ -6,7 +6,7 @@ import os
 
 def replace_redmine_wiki_with_textile_link(page_content):
     """
-    Restructure links from [[Wiki Page]] to "Wiki page":wiki_page.md
+    Restructure links from [[Wiki Page]] to "Wiki page":wiki_page/
     """
     proper = re.sub(pattern = r'\[\[(.*)\]\]', # capture text within [[]] tags
                     # must use a lambda to allow replacing within a group
@@ -15,13 +15,21 @@ def replace_redmine_wiki_with_textile_link(page_content):
                             # link text
                             '"' + match.expand(r"\1") + '"' +
                             # link path
-                            ':' + find_nested_wiki_path(match.expand(r"\1").replace(" ", "_")) + "/"
+                            ':' + find_nested_wiki_path(
+                                match.expand(r"\1") \
+                                .replace(" ", "_") \
+                                .replace("/", "")
+                            ) +
+                            "/"
                             ),
                     string = page_content)
     return proper
 
 
 def find_nested_wiki_path(search):
+    """
+    Search child directories for wiki links that are part of page content and adjust link path accordingly
+    """
     search_file = search + ".textile"
     for root, dirs, files in os.walk(os.path.dirname(args.input_file)):
         if (search_file in files):

@@ -44,7 +44,7 @@ It is assumed that the wiki pages are created in the [Textile markup language](h
 
 Scripts are provided to make the pages suitable for viewing in [MkDocs](https://www.mkdocs.org/), which requires markdown files.
 
-`convert_all_wiki_pages_to_md.sh` will automatically convert all `.textile` files[^1] to `.md` files and **delete the original `.textile` file**. Depending on 
+`convert_all_wiki_pages_to_md.sh` will automatically convert all `.textile` files[^1] to `.md` files and **delete the original `.textile` file**. It is recommended to backup your download prior to running `convert_all_wiki_pages_to_md.sh`, e.g. `tar -zcf redmine_wikis.tgz redmine_wikis`.
 
 Assuming you downloaded your wiki to `redmine_wikis/docs`, the following will create a new MkDocs environment:
 

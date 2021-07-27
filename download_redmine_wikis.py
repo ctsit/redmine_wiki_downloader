@@ -54,7 +54,8 @@ def get_wiki_page_and_attachments(identifier, wiki_title):
 
 def download_attachment(attachment_obj):
     target_url = attachment_obj['content_url']
-    filename = attachment_obj['filename']
+    # replace spaces with underscores to prevent issues in markdown links
+    filename = attachment_obj['filename'].replace(" ", "_")
     # response is a binary object of the file contents
     response = requests.get(target_url, auth = (user, password))
     # https://docs.python-requests.org/en/master/user/quickstart/#raw-response-content
@@ -91,13 +92,18 @@ def download_wiki_page(wiki_obj):
     page_content = wiki_obj.pop('text')
     attachments = wiki_obj['attachments']
     if attachments:
-        page_content += "\n" + "Attachments:"
+        # append an unordered list of links to each attachment
+        # use literal carraige returns to appease python, textile, and/or pandoc
+        page_content += """\r\n\r\n"""
+        page_content += "h2. Attachments:"
         for attachment in attachments:
             download_attachment(attachment)
             # append a Textile style link to the page
-            filename = attachment['filename'].replace(" ", "\ ")
-            attachment_link = f"\"{filename}\":{filename}"
-            page_content += "\n" + attachment_link
+            # convert spaces to underscores in both link text and path
+            filename = attachment['filename'].replace(" ", "_")
+            attachment_link = f"\"{filename}\":<{filename}>"
+            page_content += """\r\n"""
+            page_content += f"""* {attachment_link}"""
     with open(wiki_title + ".textile", 'w') as f:
         f.write(page_content)
     # FIXME: convert textile to md now instead of needing a bash script

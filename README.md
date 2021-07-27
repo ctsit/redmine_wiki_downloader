@@ -52,6 +52,15 @@ Assuming you downloaded your wiki to `redmine_wikis/docs`, the following will cr
 bash convert_all_wiki_pages_to_md.sh && mkdocs new redmine_wikis
 ```
 
+To launch your site:
+
+``` sh
+cd redmine_wikis
+mkdocs serve
+```
+
+Navigate to [localhost:8000](http://localhost:8000) to view your mkdocs wiki.
+
 Consult the [MkDocs introductory guide](https://www.mkdocs.org/getting-started/) for more information.
 
 [^1]: Redmine's wiki specification differs from default textile format, `convert_wiki_to_md.py` is used by `convert_all_wiki_pages_to_md.sh` to attempt to align the wiki pages with the textile format expected by `pandoc`.

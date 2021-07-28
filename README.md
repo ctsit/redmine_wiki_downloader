@@ -1,6 +1,8 @@
+# Redmine Wiki Downloader
+
 This utility downloads wiki pages from a Redmine instance via its [REST API](https://www.redmine.org/projects/redmine/wiki/rest_api). Wikis are downloaded into directories by project, with child directories for nested wikis; scripts are provided to allow the wiki to be managed by [MkDocs](https://www.mkdocs.org/).
 
-# Requirements
+## Requirements
 
 * Python 3.6 or later
 
@@ -9,11 +11,11 @@ Optional
 * `mkdocs`
 
 
-This utility is expected to be used in a UNIX like environment. It was developed on MacOS.
+This utility is expected to be used in a UNIX-like environment. It was developed on MacOS.
 
-# Setup
+## Setup
 
-## Configuration
+### Configuration
 
 Copy the `example.env` file to `.env`
 
@@ -29,7 +31,7 @@ REDMINE_USER=admin
 REDMINE_PASSWORD=password
 ```
 
-# Use
+## Use
 Once your configuration is set, `download_redmine_wikis.py` may be used directly to download wikis for *all* projects from your Redmine instance, including attached files.
 
 By default, this script will download all projects as siblings of the `download_redmine_wikis.py` script, you may specify an output directory with the optional `--output_dir` flag.
@@ -40,9 +42,9 @@ python3 download_redmine_wikis.py --output_dir="./redmine_wikis/docs" | tee redm
 
 It is assumed that the wiki pages are created in the [Textile markup language](https://textile-lang.com/), with [Redmine's wiki specification](https://www.redmine.org/projects/redmine/wiki/RedmineTextFormattingTextile).
 
-## Display with MkDocs
+### Display with MkDocs
 
-Scripts are provided to make the pages suitable for viewing in [MkDocs](https://www.mkdocs.org/), which requires markdown files.
+Scripts are provided to make the pages suitable for viewing in [MkDocs](https://www.mkdocs.org/), which requires Markdown files.
 
 `convert_all_wiki_pages_to_md.sh` will automatically convert all `.textile` files[^1] to `.md` files and **delete the original `.textile` file**. It is recommended to backup your download prior to running `convert_all_wiki_pages_to_md.sh`, e.g. `tar -zcf redmine_wikis.tgz redmine_wikis`.
 
